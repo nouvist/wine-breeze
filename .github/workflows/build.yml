@@ -1,5 +1,16 @@
+name: Build
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
+  workflow_dispatch:
   push:
+    tags: v*
 
 jobs:
   build:
@@ -34,5 +45,14 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          path: target/x86_64-unknown-linux-musl/wine-breeze
+          path: target/x86_64-unknown-linux-musl/release/wine-breeze
+
+      - name: Create a new release
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          gh release create \
+            ${{ github.ref_name }} \
+            target/x86_64-unknown-linux-musl/release/wine-breeze \
+            --title "Release ${{ github.ref_name }}"
