@@ -1,0 +1,38 @@
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup tools from APT
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            mingw-w64 \
+            musl \
+            llvm \
+            clang \
+            just
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-unknown-linux-musl,x86_64-pc-windows-gnu
+
+      - name: Install Rust dependencies
+        run: cargo fetch
+
+      - name: Build win32 x64 app
+        run: just build-win32
+
+      - name: Build linux x64 wrapper
+        run: just build-linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: target/x86_64-unknown-linux-musl/wine-breeze
