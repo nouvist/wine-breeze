@@ -1,15 +1,25 @@
-use std::fmt::{self, Write};
+use std::{env, fmt::Write, path::PathBuf};
 
-use thiserror::Error;
+use anyhow::{Result, anyhow};
 
 pub mod config;
 pub mod kdeglobals;
 pub mod registry;
 
-pub fn create_temporary_name(ext: &str) -> Result<String, NameError> {
+pub fn get_prefix() -> Result<PathBuf> {
+    env::var("WINEPREFIX")
+        .map(|it| PathBuf::from(it))
+        .or_else(|_| {
+            env::home_dir()
+                .ok_or(anyhow!("Home directory not found"))
+                .map(|home| home.join(".wine"))
+        })
+}
+
+pub fn create_temporary_name(ext: &str) -> Result<String> {
     let mut buf = [0u8; 16];
     let mut name = String::with_capacity(13 + 16 * 2 + 1 + ext.len());
-    getrandom::fill(&mut buf)?;
+    getrandom::fill(&mut buf).map_err(|_| anyhow!("Unable to create random buffer"))?;
 
     name.push_str("__winebreeze-");
     for byte in &buf {
@@ -19,24 +29,4 @@ pub fn create_temporary_name(ext: &str) -> Result<String, NameError> {
     name.push_str(ext);
 
     Ok(name)
-}
-
-#[derive(Error, Debug)]
-pub enum NameError {
-    #[error("Unable to create random buffer")]
-    Random(getrandom::Error),
-    #[error("Unable to format")]
-    Format(fmt::Error),
-}
-
-impl From<getrandom::Error> for NameError {
-    fn from(value: getrandom::Error) -> Self {
-        Self::Random(value)
-    }
-}
-
-impl From<fmt::Error> for NameError {
-    fn from(value: fmt::Error) -> Self {
-        Self::Format(value)
-    }
 }
