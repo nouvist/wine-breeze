@@ -46,10 +46,10 @@ impl Config {
 
             if line.starts_with("[") {
                 let cursor_next = line[1..line.len() - 1].trim();
-                cursor = Some(cursor_next.to_owned());
-                if !self.inner.contains_key(cursor_next) {
-                    self.inner
-                        .insert(cursor_next.to_owned(), Default::default());
+                let next = cursor_next.replace("][", "->");
+                cursor = Some(next.clone());
+                if !self.inner.contains_key(&next) {
+                    self.inner.insert(next, Default::default());
                 }
                 continue;
             }

@@ -28,7 +28,7 @@ pub fn get_paths() -> Result<Vec<PathBuf>, io::Error> {
     Ok(result)
 }
 
-pub fn get_config() -> Result<Config, io::Error> {
+pub fn parse_config() -> Result<Config, io::Error> {
     let mut config = Config::new();
     for path in get_paths()? {
         let file = File::open(path)?;

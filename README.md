@@ -7,4 +7,6 @@
 An unnecessarily written in Rust app that changes Wine (classic) theme to match
 KDE Breeze colors.
 
-Adapted from [Zeinok's Wine Breeze Theme Registry](https://gist.github.com/Zeinok/ceaf6ff204792dde0ae31e0199d89398).
+Inspired by [Zeinok's Wine Breeze Theme](https://gist.github.com/Zeinok/ceaf6ff204792dde0ae31e0199d89398).
+
+![img](https://github.com/nouvist/wine-breeze/raw/assets/screenshot_1.png)

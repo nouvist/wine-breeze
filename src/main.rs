@@ -1,10 +1,12 @@
 use clap::Parser;
 
-use crate::foundation::{
-    registry::{Hkey, HkeyCollection, HkeyPath},
+use crate::{
+    foundation::{create_temporary_name, kdeglobals::parse_config, registry::HkeyCollection},
+    theme::{create_classic_theme_registry, create_colors_registry, create_dark_mode_registry},
 };
 
 pub mod foundation;
+pub mod theme;
 
 /// Breezify Wine with ease
 #[derive(Parser, Debug)]
@@ -12,12 +14,19 @@ pub mod foundation;
 struct App {}
 
 fn main() {
-    let colors = Hkey {
-        path: HkeyPath::new("HKEY_CURRENT_USER/Control Panel/Colors"),
-        content: [("ActiveBorder".to_owned(), "galon wkwkwk".to_owned())].into(),
-    };
+    let _name = create_temporary_name("reg").unwrap();
 
-    let jar = HkeyCollection(vec![colors]);
+    let config = parse_config().unwrap();
+    let jar = HkeyCollection(vec![
+        create_classic_theme_registry(),
+        create_dark_mode_registry(
+            config
+                .get("General", "ColorScheme")
+                .map(|it| it.to_lowercase().contains("dark"))
+                .unwrap_or_default(),
+        ),
+        create_colors_registry(&config),
+    ]);
 
     println!("{}", jar.to_string());
 }
