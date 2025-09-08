@@ -23,25 +23,20 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y \
-            mingw-w64 \
             musl \
             llvm \
-            clang \
-            just
+            clang
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          target: x86_64-unknown-linux-musl,x86_64-pc-windows-gnu
+          target: x86_64-unknown-linux-musl
 
       - name: Install Rust dependencies
         run: cargo fetch
 
-      - name: Build win32 x64 app
-        run: just build-win32
-
-      - name: Build linux x64 wrapper
-        run: just build-linux
+      - name: Build Linux x64 musl
+        run: cargo build --release --target x86_64-unknown-linux-musl
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
