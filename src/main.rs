@@ -21,6 +21,7 @@ pub mod theme;
 #[derive(Parser, Debug)]
 #[command(version, about)]
 struct App {
+    /// Set the prefix, defaults to WINEPREFIX
     prefix: Option<PathBuf>,
 }
 
