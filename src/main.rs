@@ -52,16 +52,17 @@ fn run(app: App) -> Result<i32> {
         create_temporary_name("reg").or_else(|_| Err(anyhow!("Can't generate temporary name")))?,
     );
     let config = parse_config().unwrap();
-    let jar = HkeyCollection(vec![
+    let jar = [
         create_classic_theme_registry(),
+        create_colors_registry(&config)?,
         create_dark_mode_registry(
             config
                 .get("General", "ColorScheme")
                 .map(|it| it.to_lowercase().contains("dark"))
                 .unwrap_or_default(),
         ),
-        create_colors_registry(&config),
-    ]);
+    ];
+    let mut jar = HkeyCollection(jar.iter());
 
     fs::write(&name, jar.to_string())?;
     let status = Command::new("wine")

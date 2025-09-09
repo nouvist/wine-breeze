@@ -1,20 +1,17 @@
-use std::collections::HashMap;
-
 use crate::foundation::registry::{Hkey, HkeyPath};
 
 pub fn create_dark_mode_registry(dark: bool) -> Hkey {
+    let mut hkey = Hkey::new(HkeyPath::new(
+        r"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+    ));
+
     let dword = match dark {
         true => 0,
         false => 1,
     };
 
-    Hkey {
-        path: HkeyPath::current_user()
-            .join(r"Software\Microsoft\Windows")
-            .join(r"CurrentVersion\Themes\Personalize"),
-        content: HashMap::from([
-            ("AppsUseLightTheme".to_owned(), dword.into()),
-            ("SystemUsesLightTheme".to_owned(), dword.into()),
-        ]),
-    }
+    hkey.insert("AppsUseLightTheme".to_owned(), dword.into());
+    hkey.insert("SystemUsesLightTheme".to_owned(), dword.into());
+
+    hkey
 }

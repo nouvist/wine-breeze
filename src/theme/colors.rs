@@ -1,60 +1,53 @@
-use std::collections::HashMap;
+use anyhow::{anyhow, Result};
 
 use crate::foundation::{
     config::Config,
     registry::{Hkey, HkeyData, HkeyPath},
 };
 
-fn val(config: &Config, key: &str, namespace: &str, name: &str) -> Option<(String, HkeyData)> {
+fn val(config: &Config, namespace: &str, name: &str) -> Result<HkeyData> {
     match config.get(namespace, name) {
-        Some(it) => Some((key.to_owned(), it.replace(",", " ").into())),
-        None => None,
+        Some(it) => Ok(it.replace(",", " ").into()),
+        None => Err(anyhow!("Config for {namespace} -> {name} is not found")),
     }
 }
 
-fn ins(map: &mut HashMap<String, HkeyData>, item: Option<(String, HkeyData)>) {
-    if let Some((key, value)) = item {
-        map.insert(key, value);
-    }
-}
-
-pub fn create_colors_registry(config: &Config) -> Hkey {
-    let mut map = HashMap::<String, HkeyData>::new();
+pub fn create_colors_registry(config: &Config) -> Result<Hkey> {
+    let mut hkey = Hkey::new (
+        HkeyPath::new("HKEY_CURRENT_USER/Control Panel/Colors")
+    );
     
     // TODO: use better mapping?
-    ins(&mut map, val(config, "ActiveBorder", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "ActiveTitle", "Colors:Header", "BackgroundNormal"));
-    ins(&mut map, val(config, "AppWorkSpace", "Colors:View", "BackgroundNormal"));
-    ins(&mut map, val(config, "Background", "Colors:View", "BackgroundNormal"));
-    ins(&mut map, val(config, "ButtonAlternativeFace", "Colors:Button", "BackgroundNormal"));
-    ins(&mut map, val(config, "ButtonDkShadow", "Colors:Button", "ForegroundInactive"));
-    ins(&mut map, val(config, "ButtonFace", "Colors:Button", "BackgroundNormal"));
-    ins(&mut map, val(config, "ButtonHilight", "Colors:Button", "ForegroundInactive"));
-    ins(&mut map, val(config, "ButtonLight", "Colors:Button", "BackgroundNormal"));
-    ins(&mut map, val(config, "ButtonShadow", "Colors:Button", "BackgroundNormal"));
-    ins(&mut map, val(config, "ButtonText", "Colors:Button", "ForegroundNormal"));
-    ins(&mut map, val(config, "GradientActiveTitle", "Colors:Header", "BackgroundNormal"));
-    ins(&mut map, val(config, "GradientInactiveTitle", "Colors:Header", "BackgroundNormal"));
-    ins(&mut map, val(config, "GrayText", "Colors:Button", "ForegroundInactive"));
-    ins(&mut map, val(config, "Hilight", "Colors:Selection", "BackgroundNormal"));
-    ins(&mut map, val(config, "HilightText", "Colors:Selection", "ForegroundNormal"));
-    ins(&mut map, val(config, "InactiveBorder", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "InactiveTitle", "Colors:Header", "BackgroundNormal"));
-    ins(&mut map, val(config, "InactiveTitleText", "Colors:Window", "ForegroundInactive"));
-    ins(&mut map, val(config, "InfoText", "Colors:Tooltip", "ForegroundNormal"));
-    ins(&mut map, val(config, "InfoWindow", "Colors:Tooltip", "BackgroundNormal"));
-    ins(&mut map, val(config, "Menu", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "MenuBar", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "MenuHilight", "Colors:Selection", "BackgroundNormal"));
-    ins(&mut map, val(config, "MenuText", "Colors:Window", "ForegroundNormal"));
-    ins(&mut map, val(config, "Scrollbar", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "TitleText", "Colors:Header", "ForegroundNormal"));
-    ins(&mut map, val(config, "Window", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "WindowFrame", "Colors:Window", "BackgroundNormal"));
-    ins(&mut map, val(config, "WindowText", "Colors:Window", "ForegroundNormal"));
+    hkey.insert("ActiveBorder".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("ActiveTitle".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("AppWorkSpace".to_owned(), val(config, "Colors:View", "BackgroundNormal")?);
+    hkey.insert("Background".to_owned(), val(config, "Colors:View", "BackgroundNormal")?);
+    hkey.insert("ButtonAlternativeFace".to_owned(), val(config, "Colors:Button", "BackgroundNormal")?);
+    hkey.insert("ButtonDkShadow".to_owned(), val(config, "Colors:Button", "ForegroundInactive")?);
+    hkey.insert("ButtonFace".to_owned(), val(config, "Colors:Button", "BackgroundNormal")?);
+    hkey.insert("ButtonHilight".to_owned(), val(config, "Colors:Button", "ForegroundInactive")?);
+    hkey.insert("ButtonLight".to_owned(), val(config, "Colors:Button", "BackgroundNormal")?);
+    hkey.insert("ButtonShadow".to_owned(), val(config, "Colors:Button", "BackgroundNormal")?);
+    hkey.insert("ButtonText".to_owned(), val(config, "Colors:Button", "ForegroundNormal")?);
+    hkey.insert("GradientActiveTitle".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("GradientInactiveTitle".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("GrayText".to_owned(), val(config, "Colors:Button", "ForegroundInactive")?);
+    hkey.insert("Hilight".to_owned(), val(config, "Colors:Selection", "BackgroundNormal")?);
+    hkey.insert("HilightText".to_owned(), val(config, "Colors:Selection", "ForegroundNormal")?);
+    hkey.insert("InactiveBorder".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("InactiveTitle".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("InactiveTitleText".to_owned(), val(config, "Colors:Window", "ForegroundInactive")?);
+    hkey.insert("InfoText".to_owned(), val(config, "Colors:Tooltip", "ForegroundNormal")?);
+    hkey.insert("InfoWindow".to_owned(), val(config, "Colors:Tooltip", "BackgroundNormal")?);
+    hkey.insert("Menu".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("MenuBar".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("MenuHilight".to_owned(), val(config, "Colors:Selection", "BackgroundNormal")?);
+    hkey.insert("MenuText".to_owned(), val(config, "Colors:Window", "ForegroundNormal")?);
+    hkey.insert("Scrollbar".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("TitleText".to_owned(), val(config, "Colors:Window", "ForegroundNormal")?);
+    hkey.insert("Window".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("WindowFrame".to_owned(), val(config, "Colors:Window", "BackgroundNormal")?);
+    hkey.insert("WindowText".to_owned(), val(config, "Colors:Window", "ForegroundNormal")?);
 
-    Hkey {
-        path: HkeyPath::new("HKEY_CURRENT_USER/Control Panel/Colors"),
-        content: map,
-    }
+    Ok(hkey)
 }
