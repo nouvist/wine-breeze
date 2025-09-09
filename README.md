@@ -1,5 +1,7 @@
 # Wine Breeze
 
+[![release](https://img.shields.io/github/v/release/nouvist/wine-breeze)](https://github.com/nouvist/wine-breeze/releases)
+
 > [!NOTE]
 > This project is neither related to nor affiliated with the Wine or KDE
 > projects.
